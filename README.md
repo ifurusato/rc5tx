@@ -41,7 +41,7 @@ something like
 ```
 on a Macintosh, or
 ```
-  /media/username/BOSS\ RC-5/ROLAND/WAVE
+  /media/furusato/BOSS\ RC-5/ROLAND/WAVE
 ```
 on Linux.
 
