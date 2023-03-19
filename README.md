@@ -16,7 +16,7 @@ Requirements
 
 The latter can be installed via pip3:
 ```
-    pip3 colorama
+    pip3 install colorama
 ```
 
 To Use
