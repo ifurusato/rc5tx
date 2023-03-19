@@ -84,7 +84,8 @@ Subsequent executions of the script no longer require the two arguments, with th
 previous source and target values used as defaults.
 
 If you want to avoid the existing preferences just delete the prefs file. Including
-new values will override the defaults, with the new values becoming the defaults.
+new command line arguments will override the defaults, with the new values becoming
+the defaults.
 
 
 Upon Completion
