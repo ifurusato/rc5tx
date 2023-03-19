@@ -108,3 +108,6 @@ OVERDUBBING (yellow display) mode.
 *NOTE:* If you care about any of the stored files on the RC-5, be sure you have
 backup copies of anything on the pedal before executing the script.
 
+---
+~Boss and Loop Station are registered trademarks of Roland Corporation.~
+
