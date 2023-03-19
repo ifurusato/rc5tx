@@ -1,6 +1,9 @@
 README for rc5tx (Boss RC-5 Transfer)
 =====================================
 
+![RC-5 Loopers](img/loopers.jpg?raw=true "Boss RC-5 Loopers")
+
+
 Description
 -----------
 
