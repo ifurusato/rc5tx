@@ -50,7 +50,7 @@ to find an reasonable example. This was the best I could do:
 ```
 \?usb#vid_0781&pid_55ab#04016ceecfc0c8eb#{4d36e967-e325-11ce-bfc1-08002be10318\ROLAND\WAVE
 ```
-Whatever.
+Whatever 😑.
 
 
 To Execute the Script
