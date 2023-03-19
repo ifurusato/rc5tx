@@ -7,7 +7,7 @@ README for rc5tx (Boss RC-5 Transfer)
 Description
 -----------
 
-Copies *.WAV files from a source directory to a target directory tree, using the
+Copies *.WAV files from a source directory to a target directory, using the
 **Roland RC-5 Loop Station** file structure as a basis.
 
 This will recursively copy any *.WAV files found in the source directory tree
