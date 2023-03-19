@@ -11,9 +11,9 @@ Copies *.WAV files from a source directory to a target directory, using the
 **Roland RC-5 Loop Station** file structure as a basis.
 
 This will recursively copy any *.WAV files found in the source directory tree
-and sort them *alphabetically* (regardless of original location), writint them
-to the sequentially-numbered directories in the target directory (001_1/, 002_1/,
-099_1/, etc.). The RC-5 supports up to 99 "memories", play-selectable via its
+and sort them *alphabetically* (regardless of original location), writing them
+to sequentially-numbered directories (001_1/, 002_1/, 099_1/, etc.) in the
+target directory. The RC-5 supports up to 99 "memories", play-selectable via its
 MEMORY knob.
 
 Note that if you are proficient using rsync and set up a source tree mirroring
