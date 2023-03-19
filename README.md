@@ -66,6 +66,8 @@ Boss RC-5 Loop Station guitar pedal. E.g.,
 ```
   rc5tx.py /Users/furusato/Desktop/rc5-source/WAVE /Volumes/BOSS RC-5/ROLAND/WAVE
 ```
+Depending on your operating system's path requirements you may need to escape
+any space characters in the file path, or perhaps surround it with quotes.
 
 Type for help:
 ```
