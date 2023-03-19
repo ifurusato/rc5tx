@@ -8,7 +8,16 @@ Description
 -----------
 
 Copies *.WAV files from a source directory tree to a target directory tree as
-a sorted list, using the Roland RC-5 file structure as a basis.
+a sorted list, using the **Roland RC-5 Loop Station** file structure as a basis.
+
+This will recursively copy any *.WAV files found in the source directory tree
+and sort them *alphabetically* (regardless of original location), then writes
+them to the sequentially-numbered directories in the target directory 
+(001_1/, 002_1/, etc.). The RC-5 supports up to 99 "memories", play-selectable
+via its MEMORY knob.
+
+Note that if you are proficient using rsync and set up a source tree mirroring
+the directory structure of the RC-5, you do not need this script.
 
 
 Requirements
@@ -107,9 +116,9 @@ drive is recommended. This has the benefit of replacing any WAV files that have
 been modified by a clumsy attempt to halt play that accidentally put the RC-5 in
 OVERDUBBING (yellow display) mode.
 
-*NOTE:* If you care about any of the stored files on the RC-5, be sure you have
+**NOTE:** If you care about any of the stored files on the RC-5, be sure you have
 backup copies of anything on the pedal before executing the script.
 
 ---
 
-<sup><sub>Boss and Loop Station are registered trademarks of Roland Corporation.</sub></sup>
+<sup><sub>Roland, BOSS and LOOP STATION are registered trademarks of Roland Corporation.</sub></sup>
