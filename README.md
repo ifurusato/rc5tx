@@ -1,14 +1,14 @@
-README for rc5tx (Boss RC-5 Transfer)
+README for rc5tx (BOSS RC-5 Transfer)
 =====================================
 
-![RC-5 Loopers](img/loopers.jpg?raw=true "Boss RC-5 Loopers")
+![RC-5 Loopers](img/loopers.jpg?raw=true "BOSS RC-5 Loopers")
 
 
 Description
 -----------
 
 Copies *.WAV files from a source directory to a target directory, using the
-**Roland RC-5 Loop Station** file structure as a basis.
+**Roland BOSS RC-5 Loop Station** file structure as a basis.
 
 This will recursively copy any *.WAV files found in the source directory tree
 and sort them *alphabetically* (regardless of original location), writing them
@@ -71,7 +71,7 @@ To execute the script, try:
 ```
 where SOURCE is the full path to a directory containing 1-99 *.WAV files, and
 TARGET is the full path to a directory named "WAVE", usually the directory on a
-Boss RC-5 Loop Station guitar pedal. E.g.,
+BOSS RC-5 Loop Station guitar pedal. E.g.,
 ```
   rc5tx.py /Users/furusato/Desktop/rc5-source/WAVE /Volumes/BOSS RC-5/ROLAND/WAVE
 ```
