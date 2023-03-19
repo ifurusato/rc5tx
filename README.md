@@ -16,7 +16,7 @@ Requirements
 
 The latter can be installed via pip3:
 ```
-    pip3 install colorama
+  pip3 install colorama
 ```
 
 To Use
@@ -24,18 +24,18 @@ To Use
 
 Try:
 ```
-rc5tx.py SOURCE TARGET
+  rc5tx.py SOURCE TARGET
 ```
-where SOURCE is a directory tree containing 1-99 *.WAV files, and TARGET is
-a directory named "WAVE", usually the directory on a Boss RC-5 Loop Station
-guitar pedal. E.g., 
+where SOURCE is the full path to a directory tree containing 1-99 *.WAV files,
+and TARGET is the full path to a directory named "WAVE", usually the directory
+on a Boss RC-5 Loop Station guitar pedal. E.g., 
 ```
-rc5tx.py /Users/furusato/Desktop/rc5-source/WAVE /Volumes/BOSS RC-5/ROLAND/WAVE
+  rc5tx.py /Users/furusato/Desktop/rc5-source/WAVE /Volumes/BOSS RC-5/ROLAND/WAVE
 ```
 
 Type for help:
 ```
-rc5tx.py
+  rc5tx.py
 ```
 After the application has successfully been executed the first time it stores
 the SOURCE and TARGET values in a .rc5tx.pref file in the user's home directory.
