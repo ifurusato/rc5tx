@@ -127,3 +127,7 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# rc5tx
+.rc5tx.py.swp
+.rc5tx.pref

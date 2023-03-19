@@ -89,6 +89,7 @@ def clean_target_directory(_log, target):
 
 # transfer files ┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈
 def transfer_files(_log, source, source_files, target):
+    catalog = {}
     file_count = len(source_files)
     _log.info('transferring {} files from source directory:\t'.format(file_count)+Fore.WHITE+'{}'.format(source))
     _log.info('                        to target directory:\t'+Fore.MAGENTA+'{}'.format(target))
@@ -103,12 +104,31 @@ def transfer_files(_log, source, source_files, target):
             if not target_dir.is_dir():
                 os.makedirs(target_dir)
             # do the deed
-            shutil.copy2(source_file, target_dir)
+            source_filename = os.path.basename(source_file)
+            target_file = os.path.join(target_dir, source_filename)
+            shutil.copy2(source_file, target_file)
             _log.info('…to directory:\t'+Fore.MAGENTA+'{}'.format(target_dir))
+            catalog['{:02d}'.format(i+1)] = target_file
         except OSError as e:
             _log.error('Error: %s - %s.' % (e.filename, e.strerror))
-            return False
-    return True
+    return catalog
+
+# print catalog of transferred files ┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈
+def print_catalog(_log, catalog):
+    '''
+             1         2         3         4         5         6         7         8
+    12345678901234567890123456789012345678901234567890123456789012345678901234567890
+    memory:   size (KB):     filename:
+    01         123456789     long pathname...
+    99
+    '''
+    _log.info('catalog of files:\n\n' + Fore.WHITE + '    memory:   size (KB):     file:')
+    for memory, filepath in catalog.items():
+        subdirname = os.path.basename(os.path.dirname(filepath))
+        filename = os.path.basename(filepath)
+        filesize = int(Path(filepath).stat().st_size / 1000.0)
+        print(Fore.WHITE + '    {:<8}  {:>10}     {}/{}'.format(memory, filesize, subdirname, filename))
+    print('')
 
 # help ┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈
 def help():
@@ -167,7 +187,7 @@ def main(argv):
             return
         _log.info('initialised.')
 
-        # validate source directory
+        # validate: source directory
         source = Path(source_arg)
         if source.exists():
             if source.is_dir():
@@ -176,7 +196,7 @@ def main(argv):
                 raise NotADirectoryError('source argument is not a directory: {}'.format(source_arg))
         else:
             raise FileNotFoundError('source directory does not exist: {}'.format(source_arg))
-        # validate target directory
+        # validate: target directory
         target = Path(target_arg)
         if target.exists():
             if not target.is_dir():
@@ -184,11 +204,11 @@ def main(argv):
         else:
             raise FileNotFoundError('target directory does not exist: {}'.format(source_arg))
 
-        # let's be safe
+        # validate: check source and target aren't the same
         if source == target:
             _log.error('exit: source and target directory are the same:\t'+Fore.WHITE+'{}'.format(source_arg))
             return
-        # expect 'WAVE' as target directory
+        # validate: 'WAVE' as target directory
         wave_dir = os.path.basename(os.path.normpath(target))
         if wave_dir != 'WAVE':
             _log.error('expected target directory to be named "WAVE", not: '+Fore.WHITE+'{}'.format(wave_dir))
@@ -203,6 +223,11 @@ def main(argv):
             if f1.is_file() and ext == '.wav':
                 source_files.append(f1)
 
+        # validate: RC-5 has limit of 99 memories
+        if len(source_files) > 99:
+            _log.error('exit: too many source files ({})'.format(len(source_files)))
+            return
+
         # sort list by filename
         source_files.sort(key=get_filename)
         _log.info('found {} source files (sorted):'.format(len(source_files)))
@@ -215,9 +240,12 @@ def main(argv):
             _log.info(Fore.WHITE + 'continuing…')
             if clean_target_directory(_log, target):
                 tstart = datetime.now()
-                if transfer_files(_log, source, source_files, target):
+                catalog = transfer_files(_log, source, source_files, target)
+                if len(catalog) > 0:
                     # write prefs upon successful transfer
                     prefs_write(_log, source, target)
+                    # print catalog
+                    print_catalog(_log, catalog)
                 # we're done...
                 tend = datetime.now()
                 elapsed = ( tend - tstart )
