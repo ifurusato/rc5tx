@@ -81,9 +81,10 @@ After the application has successfully executed it stores the SOURCE and TARGET
 values in a .rc5tx.pref file in your home directory. 
 
 Subsequent executions of the script no longer require the two arguments, with the
-previous source and target values used as defaults. If you want to avoid these
-preferences just delete the prefs file. Including new values will override the
-defaults (with the new values becoming the new defaults).
+previous source and target values used as defaults.
+
+If you want to avoid the existing preferences just delete the prefs file. Including
+new values will override the defaults, with the new values becoming the defaults.
 
 
 Upon Completion
@@ -94,8 +95,8 @@ whatever is the norm for your operating system. Do not simply disconnect the USB
 plug. Once unmounted the RC-5 goes back into its normal mode.
 
 
-Option to Clear Existing WAV Files onthe RC-5
----------------------------------------------
+Option to Clear Existing WAV Files on the RC-5
+----------------------------------------------
 
 When you execute the script you will have the option to clear the target drive of
 any existing *.WAV files. If you decline the script will still run; any existing
