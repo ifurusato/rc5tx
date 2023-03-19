@@ -109,5 +109,5 @@ OVERDUBBING (yellow display) mode.
 backup copies of anything on the pedal before executing the script.
 
 ---
-~Boss and Loop Station are registered trademarks of Roland Corporation.~
+^Boss and Loop Station are registered trademarks of Roland Corporation.^
 
