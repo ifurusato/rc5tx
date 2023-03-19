@@ -8,7 +8,8 @@ Description
 -----------
 
 Copies *.WAV files from a source directory to a target directory, using the
-**Roland BOSS RC-5 Loop Station** file structure as a basis.
+[Roland BOSS RC-5 Loop Station](https://www.boss.info/global/products/rc-5/)
+file structure as a basis.
 
 This will recursively copy any *.WAV files found in the source directory tree
 and sort them *alphabetically* (regardless of original location), writing them
