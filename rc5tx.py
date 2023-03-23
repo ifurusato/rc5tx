@@ -8,11 +8,13 @@
 #
 # author:   Ichiro Furusato
 # created:  2023-03-19
-# modified: 2023-03-19
+# modified: 2023-03-23
 #
 # Description: copies *.WAV files from a source directory tree to a target
 # directory tree as a sorted list, using the Roland RC-5 file structure as
-# a basis.
+# a basis. 
+#
+# It looks to the current working directory for a .rc5tx.prefs file.
 
 import sys, os, signal, traceback, json, shutil, calendar, time
 from pathlib import Path
@@ -25,7 +27,7 @@ from core.logger import Logger, Level
 # if dry_run=True no files are modified
 dry_run = False
 # get pref file, either from home dir
-home_dir = str(Path.home())
+#home_dir = str(Path.home())
 # or current work directory
 home_dir = str(os.getcwd())
 
