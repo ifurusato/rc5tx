@@ -1,0 +1,8 @@
+#!/bin/sh
+#
+# locate this script within your path if you want to avoid the '.py' when executing the script.
+#
+# modify to point to rc5tx.py script:
+
+~/workspaces/workspace-rc5tx/rc5tx/rc5tx.py "$@"
+

@@ -1,38 +1,50 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 #
-# Copyright © 2023 Ichiro Furusato. All Rights Reserved.
-# These materials are owned and copyrighted by Ichiro Furusato, and use is subject
-# to terms of the Neocortext Software License, included as the file 'LICENSE' with
-# the distribution. This notice and attribution to the author may not be removed.
+COPYRIGHT = '''
+Copyright © 2023 Ichiro Furusato. All Rights Reserved.
+These materials are owned and copyrighted by Ichiro Furusato, and use is subject
+to terms of the Neocortext Software License, included as the file 'LICENSE' with
+the distribution. This notice and attribution to the author may not be removed.
+
+rc5tx comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
+welcome to redistribute it under the conditions of its LICENSE.'''
+
+DESCRIPTION = '''
+Description: rc5tx copies *.WAV files from a source directory tree to a target
+directory tree as a sorted list, writing each file to a numbered directory using
+the Roland RC-5 file structure as a basis.
+
+It looks to the current working directory for a .rc5tx.prefs file.'''
+
 #
 # author:   Ichiro Furusato
 # created:  2023-03-19
 # modified: 2023-03-23
-#
-# Description: copies *.WAV files from a source directory tree to a target
-# directory tree as a sorted list, using the Roland RC-5 file structure as
-# a basis. 
-#
-# It looks to the current working directory for a .rc5tx.prefs file.
+# 
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 import sys, os, signal, traceback, json, shutil, calendar, time
 from pathlib import Path
 from datetime import datetime
+import scipy
+from scipy.io import wavfile
 from colorama import init, Fore, Style
 init()
 
+import warnings
+warnings.filterwarnings(action='ignore', category=wavfile.WavFileWarning) 
+
 from core.logger import Logger, Level
 
-# if dry_run=True no files are modified
-dry_run = False
-# get pref file, either from home dir
-#home_dir = str(Path.home())
-# or current work directory
-home_dir = str(os.getcwd())
+# if DRY_RUN=True no files are modified
+DRY_RUN = False
+# if NO_DURATION_STATS=True then don't bother getting the WAV file duration
+NO_DURATION_STATS = False
 
-pref_filename = '.rc5tx.pref'
-PREF_FILE = os.path.join(home_dir, pref_filename)
+# get pref file, from current working directory
+PREF_FILENAME = '.rc5tx.pref'
+PREF_FILE = os.path.join(str(os.getcwd()), PREF_FILENAME)
 
 # execution handler ┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈
 def signal_handler(signal, frame):
@@ -77,20 +89,49 @@ def clean_target_directory(_log, target):
         return True
     elif input(Fore.RED + 'Delete {} existing WAV files in the target directory. Are you sure? (y/n): '.format(len(target_files))).lower().strip() == 'y':
         for f in target_files:
-            if dry_run:
+            if DRY_RUN:
                 _log.info('deleting target file (dry run):\t'+Fore.WHITE+'{}'.format(f))
             else:
                 try:
                     _log.info('deleting target file:\t'+Fore.WHITE+'{}'.format(f))
                     os.remove(f)
                 except OSError as e:
-                    _log.error('Error: %s - %s.' % (e.filename, e.strerror))
+                    _log.error('Error: {} - {}.'.format(e.filename, e.strerror))
                     return False
         _log.info('target directory successfully cleaned.')
         return True
     else:
         _log.info('user did not want to clean target directory, will overwrite any existing matching files.')
         return True
+
+# get length of wave file in seconds ┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈
+
+# function to convert the information into some readable format
+def output_duration(length):
+    hours = length // 3600  # hours
+    length %= 3600
+    mins = length // 60     # minutes
+    length %= 60
+    seconds = length        # seconds
+    return hours, mins, seconds
+
+def get_wav_duration(_log, file):
+    if NO_DURATION_STATS:
+        return '--:--:--'
+    _log.info('getting duration of file: {}…'.format(os.fspath(file)))
+    try:
+        # sample_rate holds the sample rate of the wav file in (sample/sec) format
+        # data is the numpy array that consists of actual data read from the wav file
+        sample_rate, data = wavfile.read(os.fspath(file))
+        len_data = len(data)        # holds length of the numpy array
+        t = len_data / sample_rate  # returns duration but in floats
+        hours, mins, seconds = output_duration(int(t))
+        duration_hms = '{:02d}:{:02d}:{:02d}'.format(hours, mins, seconds)
+#       duration_hms = '{:02d}:{:02d}:{:02d}'.format(hours, mins, seconds)
+        return duration_hms
+    except Exception as e:
+        _log.error('error getting wave length: {}'.format(e))
+        return 'EE:EE:EE'
 
 # transfer files ┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈
 def transfer_files(_log, source, source_files, target):
@@ -110,13 +151,20 @@ def transfer_files(_log, source, source_files, target):
                 os.makedirs(target_dir)
             # do the deed
             source_filename = os.path.basename(source_file)
+            duration_s = get_wav_duration(_log, source_file)
             target_file = os.path.join(target_dir, source_filename)
             shutil.copy2(source_file, target_file)
             _log.info('…to directory:\t'+Fore.MAGENTA+'{}'.format(target_dir))
-            catalog['{:02d}'.format(i+1)] = target_file
+            catalog['{:02d}'.format(i+1)] = ( duration_s, target_file )
         except OSError as e:
-            _log.error('Error: %s - %s.' % (e.filename, e.strerror))
+            _log.error('Error: {} - {}.'.format(e.filename, e.strerror))
     return catalog
+
+# get timestamp ┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈
+def get_timestamp():
+    # create GMT timestamp as date-time
+    date_time = datetime.fromtimestamp(calendar.timegm(time.gmtime()))
+    return date_time.strftime("%d-%m-%YT%H:%M:%S")
 
 # print catalog of transferred files ┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈
 def print_catalog(_log, catalog):
@@ -126,45 +174,48 @@ def print_catalog(_log, catalog):
     # create GMT timestamp as date-time
     date_time = datetime.fromtimestamp(calendar.timegm(time.gmtime()))
     # then format as filesystem-safe string
-    str_date_time = date_time.strftime("%d-%m-%YT%H-%M-%S")
-    catalogFile = 'catalog-rc5tx-{}.txt'.format(str_date_time)
-    with open(catalogFile, 'a') as fout:
-        fout.write('catalog of files:\n\n    memory:   size (KB):     file:\n')
-        _log.info('catalog of files:\n\n' + Fore.WHITE + '    memory:   size (KB):     file:')
-        for memory, filepath in catalog.items():
+    timestamp = get_timestamp()
+    fs_timestamp = timestamp.replace(':', '-')
+    catalog_filename = 'catalog-rc5tx-{}.md'.format(fs_timestamp)
+    with open(catalog_filename, 'a') as fout:
+        fout.write('audio file catalog - {}\n--------------------------\n\n'.format(timestamp))
+        fout.write('\n    memory:   size (KB):     duration:     file:\n')
+        _log.info('catalog of files:\n\n' + Fore.WHITE + '    memory:   size (KB):     duration:     file:')
+        for memory, info in catalog.items():
+            duration_s = info[0]
+            filepath = info[1]
             subdirname = os.path.basename(os.path.dirname(filepath))
             filename = os.path.basename(filepath)
             filesize = int(Path(filepath).stat().st_size / 1000.0)
-            line = ('    {:<8}  {:>10}     {}/{}'.format(memory, filesize, subdirname, filename))
+            line = ('    {:<8}  {:>10}      {:>8}     {}/{}'.format(memory, filesize, duration_s, subdirname, filename))
             fout.write(line + '\n')
             print(Fore.WHITE + line)
         fout.write('\n')
         print('')
-    _log.info('wrote catalog file: {}'.format(catalogFile))
+    _log.info('wrote catalog file: {}'.format(catalog_filename))
 
 # help ┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈
 def help():
-    help_text1 = '''
-Copyright © 2023 Ichiro Furusato. All Rights Reserved.
-These materials are owned and copyrighted by Ichiro Furusato, and use is subject
-to terms of the Neocortext Software License, included as the file 'LICENSE' with
-the distribution. This notice and attribution to the author may not be removed.
-
-rc5tx comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
-welcome to redistribute it under the conditions of its LICENSE.
-
-Description: rc5tx copies *.WAV files from a source directory tree to a target
-directory tree as a sorted list, writing each file to a numbered directory using
-the Roland RC-5 file structure as a basis.'''
+#    COPYRIGHT = '''
+#Copyright © 2023 Ichiro Furusato. All Rights Reserved.
+#These materials are owned and copyrighted by Ichiro Furusato, and use is subject
+#to terms of the Neocortext Software License, included as the file 'LICENSE' with
+#the distribution. This notice and attribution to the author may not be removed.
+#
+#rc5tx comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
+#welcome to redistribute it under the conditions of its LICENSE.
     usage = '''
-Usage: rc5tx SOURCE TARGET'''
+Usage: 
+
+    rc5tx SOURCE_DIRECTORY TARGET_DIRECTORY'''
     help_text2 = '''
 Upon successful execution a file named '{}' containing
-the default values is written to the user's home directory. If this file is
+the default values is written to the current working directory. If this file is
 subsequently found, the two arguments are not required, though new command line
 arguments will override the defaults and rewrite the prefs file.
-'''.format(PREF_FILE)
-    print(Fore.GREEN + help_text1)
+'''.format(PREF_FILENAME)
+    print(Fore.GREEN + COPYRIGHT)
+    print(Fore.GREEN + DESCRIPTION)
     print(Fore.WHITE + usage)
     print(Fore.GREEN + help_text2)
 
@@ -190,12 +241,10 @@ def main(argv):
             # read prefs file...
             pref_args = prefs_read(_log)
             source_arg = pref_args.get('source')
-            _log.info('pref_args source: {}'.format(source_arg))
             target_arg = pref_args.get('target')
-            _log.info('pref_args target: {}'.format(target_arg))
         else:
             help()
-            _log.info('exit: expecting two arguments.')
+            _log.warning('exit: expecting two arguments.')
             return
         _log.info('initialised.')
 
@@ -212,9 +261,11 @@ def main(argv):
         target = Path(target_arg)
         if target.exists():
             if not target.is_dir():
-                raise NotADirectoryError('target argument is not a directory: {}'.format(source_arg))
+                raise NotADirectoryError('target argument is not a directory: {}'.format(target_arg))
         else:
-            raise FileNotFoundError('target directory does not exist: {}'.format(source_arg))
+            _log.error('target directory does not exist: {}'.format(target_arg))
+            _log.error('Is the RC-5 mounted as a USB device?')
+            return
 
         # validate: check source and target aren't the same
         if source == target:

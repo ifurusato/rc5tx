@@ -7,11 +7,11 @@ README for rc5tx (BOSS RC-5 Transfer)
 Description
 -----------
 
-Copies *.WAV files from a source directory to a target directory, using the
+Copies WAV files from a source directory to a target directory, using the
 [Roland BOSS RC-5 Loop Station](https://www.boss.info/global/products/rc-5/)
 file structure as a basis.
 
-This will recursively copy any *.WAV files found in the source directory tree
+This will recursively copy any WAV files found in the source directory tree
 and sort them *alphabetically* (regardless of original location), writing them
 to sequentially-numbered directories (001_1/, 002_1/, 099_1/, etc.) in the
 target directory. The RC-5 supports up to 99 "memories", play-selectable via its
@@ -66,7 +66,7 @@ Whatever 😑.
 Creating Compatible WAV Files
 -----------------------------
 
-For compatibility with the RC-5 audio files must be stereo, 44.1kHz, 32 bit float 
+For compatibility with the RC-5 audio files must be stereo, 44.1kHz, 32 bit float
 WAV files. Files not fitting this description will be ignored.
 
 You can also use the Boss Tone Studio application to manage loading audio files.
@@ -95,6 +95,12 @@ Type for help:
 ```
   rc5tx.py
 ```
+
+Optional: The default behaviour is to obtain the duration of each WAV file as it
+is processed. For lots of long files this processing can take awhile, so if you
+don't care about reporting this information, you can change the value of the 
+variable `NO_DURATION_STATS` in the script from False to True.
+
 
 Saved Preferences
 -----------------
