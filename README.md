@@ -63,6 +63,18 @@ to find an reasonable example. This was the best I could do:
 Whatever 😑.
 
 
+Creating Compatible WAV Files
+-----------------------------
+
+For compatibility with the RC-5 audio files must be stereo, 44.1kHz, 32 bit float 
+WAV files. Files not fitting this description will be ignored.
+
+You can also use the Boss Tone Studio application to manage loading audio files.
+
+As described in the RC-5 User's Manual, "The maximum recording time is approximately
+1.5 hours for one track, and approximately 13 hours total for all memories."
+
+
 To Execute the Script
 ---------------------
 

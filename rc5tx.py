@@ -14,7 +14,7 @@
 # directory tree as a sorted list, using the Roland RC-5 file structure as
 # a basis.
 
-import sys, os, signal, traceback, json, shutil
+import sys, os, signal, traceback, json, shutil, calendar, time
 from pathlib import Path
 from datetime import datetime
 from colorama import init, Fore, Style
@@ -24,8 +24,11 @@ from core.logger import Logger, Level
 
 # if dry_run=True no files are modified
 dry_run = False
-# get pref file
+# get pref file, either from home dir
 home_dir = str(Path.home())
+# or current work directory
+home_dir = str(os.getcwd())
+
 pref_filename = '.rc5tx.pref'
 PREF_FILE = os.path.join(home_dir, pref_filename)
 
@@ -116,19 +119,26 @@ def transfer_files(_log, source, source_files, target):
 # print catalog of transferred files ┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈
 def print_catalog(_log, catalog):
     '''
-             1         2         3         4         5         6         7         8
-    12345678901234567890123456789012345678901234567890123456789012345678901234567890
-    memory:   size (KB):     filename:
-    01         123456789     long pathname...
-    99
+    Writes a catalog of files copied to the console and a timestamped file.
     '''
-    _log.info('catalog of files:\n\n' + Fore.WHITE + '    memory:   size (KB):     file:')
-    for memory, filepath in catalog.items():
-        subdirname = os.path.basename(os.path.dirname(filepath))
-        filename = os.path.basename(filepath)
-        filesize = int(Path(filepath).stat().st_size / 1000.0)
-        print(Fore.WHITE + '    {:<8}  {:>10}     {}/{}'.format(memory, filesize, subdirname, filename))
-    print('')
+    # create GMT timestamp as date-time
+    date_time = datetime.fromtimestamp(calendar.timegm(time.gmtime()))
+    # then format as filesystem-safe string
+    str_date_time = date_time.strftime("%d-%m-%YT%H-%M-%S")
+    catalogFile = 'catalog-rc5tx-{}.txt'.format(str_date_time)
+    with open(catalogFile, 'a') as fout:
+        fout.write('catalog of files:\n\n    memory:   size (KB):     file:\n')
+        _log.info('catalog of files:\n\n' + Fore.WHITE + '    memory:   size (KB):     file:')
+        for memory, filepath in catalog.items():
+            subdirname = os.path.basename(os.path.dirname(filepath))
+            filename = os.path.basename(filepath)
+            filesize = int(Path(filepath).stat().st_size / 1000.0)
+            line = ('    {:<8}  {:>10}     {}/{}'.format(memory, filesize, subdirname, filename))
+            fout.write(line + '\n')
+            print(Fore.WHITE + line)
+        fout.write('\n')
+        print('')
+    _log.info('wrote catalog file: {}'.format(catalogFile))
 
 # help ┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈
 def help():
