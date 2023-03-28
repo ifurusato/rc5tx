@@ -106,10 +106,10 @@ Saved Preferences
 -----------------
 
 After the application has successfully executed it stores the SOURCE and TARGET
-values in a .rc5tx.pref file in your home directory.
+values in a .rc5tx.pref file in the current working directory.
 
-Subsequent executions of the script no longer require the two arguments, with the
-previous source and target values used as defaults.
+Subsequent executions of the script no longer require the two arguments when used
+from that directory, with the previous source and target values used as defaults.
 
 If you want to avoid the existing preferences just delete the prefs file. Including
 new command line arguments will override the defaults, with the new values becoming
