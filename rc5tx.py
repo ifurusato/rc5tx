@@ -50,6 +50,7 @@ PREF_FILE = os.path.join(str(os.getcwd()), PREF_FILENAME)
 def signal_handler(signal, frame):
     print('\nsignal handler : INFO  : Ctrl-C caught: exiting…')
     print('exit.')
+    sys.exit(0)
 
 # write prefs ┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈
 def prefs_write(_log, source, target):
@@ -194,21 +195,17 @@ def print_catalog(_log, catalog):
         print('')
     _log.info('wrote catalog file: {}'.format(catalog_filename))
 
-# help ┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈
-def help():
-#    COPYRIGHT = '''
-#Copyright © 2023 Ichiro Furusato. All Rights Reserved.
-#These materials are owned and copyrighted by Ichiro Furusato, and use is subject
-#to terms of the Neocortext Software License, included as the file 'LICENSE' with
-#the distribution. This notice and attribution to the author may not be removed.
-#
-#rc5tx comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
-#welcome to redistribute it under the conditions of its LICENSE.
+# usage ┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈
+def usage():
     usage = '''
 Usage: 
 
     rc5tx SOURCE_DIRECTORY TARGET_DIRECTORY'''
-    help_text2 = '''
+    print(Fore.WHITE + usage)
+
+# help ┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈
+def help():
+    HELP_TEXT2 = '''
 Upon successful execution a file named '{}' containing
 the default values is written to the current working directory. If this file is
 subsequently found, the two arguments are not required, though new command line
@@ -216,8 +213,8 @@ arguments will override the defaults and rewrite the prefs file.
 '''.format(PREF_FILENAME)
     print(Fore.GREEN + COPYRIGHT)
     print(Fore.GREEN + DESCRIPTION)
-    print(Fore.WHITE + usage)
-    print(Fore.GREEN + help_text2)
+    usage()
+    print(Fore.GREEN + HELP_TEXT2)
 
 # main ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 def main(argv):
@@ -230,7 +227,12 @@ def main(argv):
     try:
         pref_file = Path(PREF_FILE)
         # we prefer 2 arguments over existence of prefs file
-        if len(argv) == 2:
+        if len(argv) > 2:
+            _log.warning('exit: found {} arguments, expected two.'.format(len(argv)))
+            usage()
+            print()
+            return
+        elif len(argv) == 2:
             _log.info('arguments:')
             for arg in argv:
                 _log.info('arg: {}'.format(arg))
@@ -243,8 +245,8 @@ def main(argv):
             source_arg = pref_args.get('source')
             target_arg = pref_args.get('target')
         else:
+            _log.warning('exit: expected two arguments.')
             help()
-            _log.warning('exit: expecting two arguments.')
             return
         _log.info('initialised.')
 
@@ -322,7 +324,7 @@ def main(argv):
 
     except KeyboardInterrupt:
         _log.error('caught Ctrl-C; exiting…')
-        sys.exit(1)
+        sys.exit(0)
     except Exception:
         _log.error('error executing rc5tx: {}'.format(traceback.format_exc()))
     finally:
